@@ -17,6 +17,7 @@ public class AuctionServer implements Runnable
    private ArrayList <Item> items = new ArrayList<Item>();
    private Item biddingItem = new Item();
    private int noOfItems = 4;
+   private int bidders = 0;
 
    public AuctionServer(int port)
    {
@@ -26,6 +27,8 @@ public class AuctionServer implements Runnable
          server = new ServerSocket(port);
          System.out.println("Server started: " + server.getInetAddress());
          start();
+         addItems();
+         getNextItemForBid();
       }
       catch(IOException ioe)
       {
@@ -69,6 +72,19 @@ public class AuctionServer implements Runnable
 		 }
       }
    }
+   
+   public void runAuction()
+   {
+//      @Override
+//      public void run() {
+         if (bidders == 0) {
+            //remove first item and add it to the auction
+            items.remove(0);
+            getNextItemForBid();
+            System.out.println("bidders == 0");
+//         }
+      }
+   }
 
   public void start()
     {
@@ -101,8 +117,9 @@ public class AuctionServer implements Runnable
          for (int i = 0; i < clientCount; i++){
 			if(clients[i].getID() != ID)
             	clients[i].send(ID + ": " + input); // sends messages to clients
-		}
-       notifyAll();
+		   }
+      runAuction();
+      notifyAll();
    }
    public synchronized void remove(int ID)
    {
@@ -144,6 +161,7 @@ public class AuctionServer implements Runnable
             clientCount++;
             welcome(clients[clientCount-1].getID());
             System.out.println(clientCount);
+            System.out.println(noOfItems);
          }
          catch(IOException ioe){
 			 System.out.println("Error opening thread: " + ioe);
@@ -152,32 +170,33 @@ public class AuctionServer implements Runnable
       else
          System.out.println("Client refused: maximum " + clients.length + " reached.");
    }
-
+   //display message to the client when joining the auction
    public void welcome(int id)
    {
+      // if first client wait for a second to coonect
        if(clientCount == 1 && noOfItems > 0)
        {
             clients[findClient(id)].send("Welcome to my auction. You are the first bidder, waiting for another before we can start!");
             System.out.println("in welcome if client==1");
        }
-
+       //auction can start
        else if (clientCount == 2 && noOfItems > 0)
        {
            clients[findClient(id)].send("Welcome to the auction. Bidding will start soon.");
            System.out.println("in welcome 22");
            for (int i = 0; i < clientCount; i++)
            {
-                clients[i].send("Next item on sales is " + biddingItem.getName() + "and starting price is " + biddingItem.getStartPrice());
+                clients[i].send("Next item on sales is " + biddingItem.getName() + " and starting price is " + biddingItem.getStartPrice());
            }
        }
    }
 
    public static void main(String args[]) {
 	   AuctionServer server = null;
-      if (args.length != 1)
-         System.out.println("Usage: java AuctionServer port");
-      else
-         server = new AuctionServer(Integer.parseInt(args[0]));
+//      if (args.length != 1)
+//         System.out.println("Usage: java AuctionServer port");
+//      else
+         server = new AuctionServer(123);//Integer.parseInt(args[0]));
    }
 
 }
