@@ -26,9 +26,9 @@ public class Item {
         this.name = name;
     }
 
-    public void setStartPrice(int startPrice)
+    public void setNewPrice(int newPrice)
     {
-        this.startPrice = startPrice;
+        this.startPrice = newPrice;
     }
 
 }
