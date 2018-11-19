@@ -135,7 +135,17 @@ public class AuctionServer implements Runnable
        }
        else
       {
-         int usersBid = Integer.decode(input);
+         int usersBid = 0;
+         try
+         {
+               if(input != null)
+                   usersBid = Integer.parseInt(input);
+         }
+         catch (NumberFormatException e)
+         {
+               usersBid = 0;
+         }
+         //int usersBid = Integer.parseInt(input);
          
          if(items.size() > 0 && usersBid > biddingItem.getStartPrice()) //check if any items are left and if usersBid is greater    than price
          {
