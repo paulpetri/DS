@@ -44,8 +44,8 @@ public class AuctionServer implements Runnable
 
    public void addItems()
    {
-       items.add(new Item("MonaLisa", 100));
-       items.add(new Item("Girl Before A Mirror", 25));
+       //items.add(new Item("MonaLisa", 100));
+       //items.add(new Item("Girl Before A Mirror", 25));
        items.add(new Item("Les Demoiselles d'Avignon", 150));
        items.add(new Item("The Old Guitarist", 50));
    }
@@ -88,7 +88,7 @@ public class AuctionServer implements Runnable
             {
                System.out.println("Items ARRAY SIZE == " + items.size());
                
-               if (bidPlaced && items.size() > 2) {
+               if (bidPlaced && items.size() > 0) {
 
                   System.out.println("bidders == 111");
                   for (int i = 0; i < clientCount; i++)
@@ -97,13 +97,25 @@ public class AuctionServer implements Runnable
                      }
                      
                   items.remove(0);
-                  System.out.println("bidders == 111");
-                  getNextItemForBid();
+                  System.out.println("Item removed 0");
                   
-                  for (int i = 0; i < clientCount; i++)
+                  if (items.size() == 0) 
                   {
-                     clients[i].send("Next item on auction is " + biddingItem.getName() + " and starting price is " + biddingItem.getStartPrice() + "£");
+                     for (int i = 0; i < clientCount; i++)
+                     {
+                        clients[i].send("The auction is over. \nNo more items available today. \nSee you again soon");
+                     }
+                     biddingItem = null;
+                    
                   }
+                  else {
+                     getNextItemForBid();
+                     for (int i = 0; i < clientCount; i++)
+                     {
+                        clients[i].send("Next item on auction is " + biddingItem.getName() + " and starting price is " + biddingItem.getStartPrice() + "£");
+                     }
+                  }
+                  
                   bidPlaced = false;
                   System.out.println("after bid FALSE RUN");
                   timer.cancel();
@@ -113,20 +125,22 @@ public class AuctionServer implements Runnable
                }//end if(bidPlaced)
                
                else {
-                  for (int i = 0; i < clientCount; i++)
-                  {
-                     clients[i].send("The item" + biddingItem.getName() + " was not sold. Will be relisted later");
+                  if (items.size() > 0) {
+                     for (int i = 0; i < clientCount; i++)
+                     {
+                        clients[i].send("The item" + biddingItem.getName() + " was not sold. Will be relisted later");
+                     }
+                     items.remove(0);
+                     items.add(new Item(biddingItem.getName(), biddingItem.getStartPrice()));
+                     getNextItemForBid();
+                     for (int i = 0; i < clientCount; i++)
+                     {
+                        clients[i].send("Next item on auction is " + biddingItem.getName() + " and starting price is " + biddingItem.getStartPrice() + "£");
+                     }
+                     System.out.println("In startAcution no bid placed");
+                     timer.cancel();
+                     startAuction();
                   }
-                  items.remove(0);
-                  items.add(new Item(biddingItem.getName(), biddingItem.getStartPrice()));
-                  getNextItemForBid();
-                  for (int i = 0; i < clientCount; i++)
-                  {
-                     clients[i].send("Next item on auction is " + biddingItem.getName() + " and starting price is " + biddingItem.getStartPrice() + "£");
-                  }
-                  System.out.println("In startAcution no bid placed");
-                  timer.cancel();
-                  startAuction();
                }
             }
       },10000);
