@@ -2,7 +2,7 @@
 
 import java.net.*;
 import java.io.*;
-import java.util.ArrayList;//import java.time.*;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -88,12 +88,8 @@ public class AuctionServer implements Runnable
             @Override
             public void run() 
             {
+               //if a bid was placed. 
                if (bidPlaced && items.size() > 0) {
-//                  //notify clients about item on sale
-//                  for (int i = 0; i < clientCount; i++)
-//                     {
-//                     clients[i].send("\nCurrent item on auction is " + biddingItem.getName() + " and curent price is " + biddingItem.getStartPrice() + "£");
-//                     }
                   items.remove(0);
                   noOfItems--;
                   System.out.println();
@@ -101,6 +97,7 @@ public class AuctionServer implements Runnable
 
                   //notify client who won tha auction and other clients the item was sold.
                   clients[findClient(ID)].send("\n********** You won the item " + "\"" + biddingItem.getName() + "\"" +" for " +  biddingItem.getStartPrice() + "£" + " **********"); 
+                  //notify other clients the item was sold 
                   for (int i = 0; i < clientCount; i++)
                   {
                      if(clients[i].getID() != ID)
@@ -109,7 +106,7 @@ public class AuctionServer implements Runnable
                      }
                   }
                
-                  
+                  //Notify all client there are no more items on sale for this auction/
                   if (items.size() == 0) 
                   {
                      for (int i = 0; i < clientCount; i++)
@@ -127,7 +124,7 @@ public class AuctionServer implements Runnable
                         clients[i].send("\nNext item on auction is " + biddingItem.getName() + " and starting price is " + biddingItem.getStartPrice() + "£");
                      }
                   }
-                  
+                  //reset bidPlace to false for nect item , cancel the timer and start auction again for next item.
                   bidPlaced = false;
                   timer.cancel();
                   startAuction(ID);
@@ -211,7 +208,6 @@ public class AuctionServer implements Runnable
          {
                usersBid = 0;
          }
-         //int usersBid = Integer.parseInt(input);
          
          if(items.size() > 0 && usersBid > biddingItem.getStartPrice()) //check if any items are left and if usersBid is greater    than startPrice
          {
@@ -224,15 +220,16 @@ public class AuctionServer implements Runnable
                }	
             }	
                clients[findClient(ID)].send("\nYou are the highest bidder for " + biddingItem.getName() + " with "  + biddingItem.getStartPrice() + "£"); 
-               //set boolean variable true if a valid bid has been accepted
+               //set boolean variable true if a valid bid has been accepted reset timer and dtart auction logic
                bidPlaced = true;
                timer.cancel(); //reset timer 
                startAuction(ID);
            // }//end for loop
          }//end inner if 
+         
          else 
          { 
-            clients[findClient(ID)].send("\n!!!!!!!!!!! A valid bid must be higher than the current value of " + biddingItem.getStartPrice() + "£ and less than " + Integer.MAX_VALUE + ", value of a integer !!!!!!!!!!"); //if bid value is lower
+            clients[findClient(ID)].send("\n!!!!!!!!!!! A valid bid must be higher than the current value of " + biddingItem.getStartPrice() + "£ and less than " + Integer.MAX_VALUE + ", value of a integer !!!!!!!!!!"); //if bid value is lower or too high
          }
       }//end outer else 
       
@@ -276,7 +273,7 @@ public class AuctionServer implements Runnable
             System.out.println(clients[clientCount].getID());
             System.out.println("In addThread");
             clientCount++;
-            welcome(clients[clientCount-1].getID());
+            welcome(clients[clientCount-1].getID()); //send the appropiate welcome message on thread creation to each client.
             System.out.println(clientCount);
             System.out.println(noOfItems);
          }
@@ -301,19 +298,19 @@ public class AuctionServer implements Runnable
        //auction can start
        else if (clientCount == 2 && noOfItems > 0)
        {
-           clients[findClient(id)].send("\n********** Welcome to the auction. Bidding is starting now. **********");
+           clients[findClient(id)].send("\n********** Welcome to the auction. Auction is starting now. **********");
 
            for (int i = 0; i < clientCount; i++)
            {
                 clients[i].send("\n\t\t\t********** Auction started!!! **********");
-                clients[i].send("\nItem on sale is " + biddingItem.getName() + " and starting price is " + biddingItem.getStartPrice());
+                clients[i].send("\nItem on sale is " + biddingItem.getName() + " and starting price is " + biddingItem.getStartPrice() + "£");
            }
           startAuction(id);
        }
       else if (clientCount > 2 && noOfItems > 0)
       {
          clients[findClient(id)].send("\n********** Welcome to the auction. Bidding is running now. **********");
-         clients[findClient(id)].send("\nItem on sale is " + biddingItem.getName() + " and the price is " + biddingItem.getStartPrice());
+         clients[findClient(id)].send("\nItem on sale is " + biddingItem.getName() + " and the price is " + biddingItem.getStartPrice() + "£");
       }
       
       else {
@@ -325,10 +322,10 @@ public class AuctionServer implements Runnable
 
    public static void main(String args[]) {
 	   AuctionServer server = null;
-//      if (args.length != 1)
-//         System.out.println("Usage: java AuctionServer port");
-//      else
-         server = new AuctionServer(123);//Integer.parseInt(args[0]));
+      if (args.length != 1)
+         System.out.println("Usage: java AuctionServer port");
+      else
+         server = new AuctionServer(Integer.parseInt(args[0]));
    }
 
 }
